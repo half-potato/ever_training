@@ -112,7 +112,7 @@ ENV LD_LIBRARY_PATH="/slang_install/lib/"
 
 WORKDIR /ever_training
 RUN source activate ever && \
-    rm -r ever/build && \
+    rm -rf ever/build && \
     bash install.bash
 
 # Expose any ports needed for training or viewer

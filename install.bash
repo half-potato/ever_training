@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e # Exit immediately if a command exits with a non-zero status.
 
 cp ever/new_files/*.py .
 cp -r ever/new_files/notebooks .
