@@ -64,10 +64,10 @@ RUN echo "conda activate ever" >> ~/.bashrc
 #     make -j"$(nproc)" && \
 #     make install
 
-RUN wget https://github.com/shader-slang/slang/releases/download/v2025.6.1/slang-2025.6.1-linux-x86_64.zip && \
+RUN wget https://github.com/shader-slang/slang/releases/download/v2025.6.4/slang-2025.6.4-linux-x86_64.zip && \
     mkdir slang_install && \
     cd slang_install && \
-    unzip ../slang-2025.6.1-linux-x86_64.zip && \
+    unzip ../slang-2025.6.4-linux-x86_64.zip && \
     cp bin/* /usr/bin/
 
 # Clone, build, and install abseil-cpp.
@@ -86,7 +86,7 @@ RUN git clone https://github.com/abseil/abseil-cpp.git /tmp/abseil-cpp && \
 RUN source activate ever && \
     # Adjust the PyTorch install line for your specific CUDA version if needed
     pip3 install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126 && \
-    pip3 install --no-cache-dir cmake
+    pip3 install --no-cache-dir 'cmake<4'
 
 # ------------------------------------------------------
 # 5) Final Container Setup

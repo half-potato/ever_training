@@ -29,11 +29,11 @@ image = (
     )
     # Install Slang
     .run_commands(
-        "wget https://github.com/shader-slang/slang/releases/download/v2025.6.1/slang-2025.6.1-linux-x86_64.zip",
+        "wget https://github.com/shader-slang/slang/releases/download/v2025.6.4/slang-2025.6.4-linux-x86_64.zip",
         "mkdir /slang_install",
-        "unzip slang-2025.6.1-linux-x86_64.zip -d /slang_install",
+        "unzip slang-2025.6.4-linux-x86_64.zip -d /slang_install",
         "cp /slang_install/bin/* /usr/bin/", # Copy binaries to standard location
-        "rm slang-2025.6.1-linux-x86_64.zip",
+        "rm slang-2025.6.4-linux-x86_64.zip",
     )
     # Install abseil-cpp from source
     .run_commands(
@@ -47,7 +47,7 @@ image = (
          # Ensure PyTorch is installed for the correct CUDA version
          "/opt/conda/bin/conda run -n ever pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126",
          # Install cmake via pip (as in Dockerfile)
-         "/opt/conda/bin/conda run -n ever pip install --no-cache-dir cmake",
+         "/opt/conda/bin/conda run -n ever pip install --no-cache-dir 'cmake<4'",
     )
     # Add requirements.txt and install dependencies into the 'ever' env, forcing build with copy=True
     .add_local_file(local_path="requirements.txt", remote_path="/requirements.txt", copy=True)
@@ -63,7 +63,7 @@ image = (
     # Run the project's install script within the 'ever' env
     .run_commands(
         # Execute install.bash using conda run to ensure correct environment activation
-        "/opt/conda/bin/conda run -n ever bash install.bash",
+        "/opt/conda/bin/conda run -n ever bash install.bash", gpu="T4"
     )
 )
 

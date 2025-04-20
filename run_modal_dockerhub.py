@@ -7,9 +7,7 @@ import time
 
 import modal
 
-from modal_image import image
-#modal.Image.from_registry("halfpotato/ever:latest", add_python="3.11") 
-app = modal.App("ever", image=image #modal.Image.from_dockerfile(Path(__file__).parent / "Dockerfile", add_python="3.11")
+app = modal.App("ever", image=modal.Image.from_registry("halfpotato/ever:latest", add_python="3.12") 
     # GCloud
     #TODO: Install gcloud
     .run_commands("apt-get update && apt-get install -y curl gnupg && \
