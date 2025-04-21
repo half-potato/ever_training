@@ -4,12 +4,14 @@ import socket
 import subprocess
 import threading
 import time
-
 import modal
 
 from modal_image import image
-#modal.Image.from_registry("halfpotato/ever:latest", add_python="3.11") 
-app = modal.App("ever", image=image #modal.Image.from_dockerfile(Path(__file__).parent / "Dockerfile", add_python="3.11")
+
+# Can use the prebuilt image as well
+#modal.Image.from_registry("halfpotato/ever:latest", add_python="3.11")
+#modal.Image.from_dockerfile(Path(__file__).parent / "Dockerfile", add_python="3.11")
+app = modal.App("ever", image=image
     # GCloud
     #TODO: Install gcloud
     .run_commands("apt-get update && apt-get install -y curl gnupg && \
@@ -24,31 +26,21 @@ app = modal.App("ever", image=image #modal.Image.from_dockerfile(Path(__file__).
     )
     .env({"GOOGLE_APPLICATION_CREDENTIALS": "/root/gcs-tour-project-service-account-key.json"})
     .run_commands("gcloud storage ls")
-    # # Add the whole OpenHome repo to the image
-    # .run_commands('git config --global url."https://${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/" && git clone --recurse-submodules https://${GITHUB_TOKEN}@github.com/N-Demir/openhome /root/openhome', secrets=[modal.Secret.from_name("github-token")])
-    # .workdir("/root/openhome")
     # # SSH server
-    # .apt_install("openssh-server")
-    # .run_commands(
-    #     "mkdir -p /run/sshd" #, "echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config", "echo 'root: ' | chpasswd" #TODO: uncomment this if the key approach doesn't work
-    # )
-    # .add_local_file(Path.home() / ".ssh/id_rsa.pub", "/root/.ssh/authorized_keys", copy=True)
+    .apt_install("openssh-server")
+    .run_commands(
+        "mkdir -p /run/sshd" #, "echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config", "echo 'root: ' | chpasswd" #TODO: uncomment this if the key approach doesn't work
+    )
+    .add_local_file(Path.home() / ".ssh/id_rsa.pub", "/root/.ssh/authorized_keys", copy=True)
     # # VSCode
-    # .run_commands("curl -fsSL https://code-server.dev/install.sh | sh")
+    .run_commands("curl -fsSL https://code-server.dev/install.sh | sh")
     # # Add Conda (for some reason necessary for ssh-based code running)
     # .run_commands("conda init bash && echo 'conda activate base' >> ~/.bashrc")
-    # # Fix Git
-    # .run_commands("git config pull.rebase true")
-    # .run_commands("git config --global user.name 'Nikita Demir'")
-    # .run_commands("git config --global user.email 'nikitde1@gmail.com'")
-
-    #! TODO: This may need to look a bit different
-    # # Add Our Code
-    # .workdir("/root/openhome/train/gsplat/")
-    # .run_commands("git checkout main") # TODO: I'm not sure why we would need this, seems maybe like it's temporary
-    # .run_commands("git pull --recurse-submodules") # This probably does nothing
-    # .run_commands("git submodule update --init --recursive") # This is important!
-    # .add_local_dir(Path(__file__).parent, "/root/openhome/train/gsplat")
+    # Install and configure Git
+    .run_commands("apt-get install -y git")
+    .run_commands("git config pull.rebase true")
+    .run_commands("git config --global user.name 'Nikita Demir'")
+    .run_commands("git config --global user.email 'nikitde1@gmail.com'")
 )
 
 
@@ -72,6 +64,7 @@ def wait_for_port(host, port, q):
     timeout=3600 * 24,
     gpu="T4",
     secrets=[modal.Secret.from_name("wandb-secret"), modal.Secret.from_name("github-token")],
+    volumes={"/root/.vscode-server": modal.Volume.from_name("vscode-server", create_if_missing=True)}
 )
 def launch_ssh(q):
     with modal.forward(22, unencrypted=True) as tunnel:
@@ -86,29 +79,28 @@ def launch_ssh(q):
 
 @app.local_entrypoint()
 def main():
-    pass
-    # import sshtunnel
+    import sshtunnel
 
-    # with modal.Queue.ephemeral() as q:
-    #     launch_ssh.spawn(q)
-    #     host, port = q.get()
-    #     print(f"SSH server running at {host}:{port}")
+    with modal.Queue.ephemeral() as q:
+        launch_ssh.spawn(q)
+        host, port = q.get()
+        print(f"SSH server running at {host}:{port}")
 
-    #     server = sshtunnel.SSHTunnelForwarder(
-    #         (host, port),
-    #         ssh_username="root",
-    #         ssh_password=" ",
-    #         remote_bind_address=("127.0.0.1", 22),
-    #         local_bind_address=("127.0.0.1", LOCAL_PORT),
-    #         allow_agent=False,
-    #     )
+        server = sshtunnel.SSHTunnelForwarder(
+            (host, port),
+            ssh_username="root",
+            ssh_password=" ",
+            remote_bind_address=("127.0.0.1", 22),
+            local_bind_address=("127.0.0.1", LOCAL_PORT),
+            allow_agent=False,
+        )
 
-    #     try:
-    #         server.start()
-    #         print(f"SSH tunnel forwarded to localhost:{server.local_bind_port}")
-    #         while True:
-    #             time.sleep(1)
-    #     except KeyboardInterrupt:
-    #         print("\nShutting down SSH tunnel...")
-    #     finally:
-    #         server.stop()
+        try:
+            server.start()
+            print(f"SSH tunnel forwarded to localhost:{server.local_bind_port}")
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            print("\nShutting down SSH tunnel...")
+        finally:
+            server.stop()
