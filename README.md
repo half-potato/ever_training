@@ -19,7 +19,7 @@ Datasets:
 
 `zipnerf-undistorted` is used for evaluation against 3DGS.
 
-More details can be found in our [paper](https://arxiv.org/abs/2410.01804) or at our [website](https://half-potato.gitlab.io/posts/ever/)
+More details can be found in our [paper](https://arxiv.org/abs/2410.01804) or at our [website](https://half-potato.gitlab.io/ever/)
 
 <section class="section" id="BibTeX">
   <div class="container is-max-desktop content">
