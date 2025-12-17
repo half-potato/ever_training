@@ -4,7 +4,7 @@ requests[socks]
 tqdm
 git+https://github.com/facebookresearch/pytorch3d.git
 kornia
-slangtorch=1.2.8
+slangtorch==1.2.8
 slangpy
 icecream
 plyfile
