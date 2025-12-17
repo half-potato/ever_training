@@ -54,6 +54,7 @@ cd SIBR_viewers
 - OptiX 7.4, which must be downloaded from NVIDIA's [website](https://developer.nvidia.com/designworks/optix/downloads/legacy). This is downloaded and placed somewhere on your computer, then use `export OptiX_INSTALL_DIR=...` to set the variable to that location.
 - [*SlangD*](https://github.com/shader-slang/slang). We recommend using this [version](https://github.com/shader-slang/slang/releases/tag/v2025.6)
 We can install the rest of the dependencies as follows:
+- SlangTorch. The version MUST be 1.2.8 or the quality will silently degrade.
 ```
 sudo apt install -y libglew-dev libassimp-dev libboost-all-dev libgtk-3-dev libopencv-dev libglfw3-dev libavdevice-dev libavcodec-dev libeigen3-dev libxxf86vm-dev libembree-dev libglm-dev
 conda env create --name ever python==3.10
